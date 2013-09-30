@@ -30,15 +30,17 @@ private:
     GPixel color2pix(const GColor &c);
     GPixel blend_pixels(GPixel src, GPixel dest);
     float pin_float(float x);
-    bool isValidToFillRect(GIRect const &rect, GColor const &src_c);
+    bool isNotValidToFillRect(GIRect const &rect, GColor const &src_c);
+    static inline int div255(int value);
 public:
     GContext3(const GBitmap&);
     virtual ~GContext3(); 
-    virtual void getBitmap(GBitmap* b) const;
-    virtual void clear(const GColor&);
+    void getBitmap(GBitmap* b) const;
+    void clear(const GColor&);
     static GContext* Create(const GBitmap& bm);
     static GContext* Create(int width, int height);
-    virtual void fillIRect(const GIRect&, const GColor&);
+    void fillIRect(const GIRect&, const GColor&);
+    void drawBitmap(const GBitmap&, int x, int y, float alpha = 1);
 };
 
 #endif

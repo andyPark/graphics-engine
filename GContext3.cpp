@@ -51,7 +51,7 @@ GContext* GContext::Create(int width, int height) {
  ************************************************************************/
 void GContext3::fillIRect(const GIRect& rect, const GColor& src_c) {
 
-    if (isValidToFillRect(rect, src_c))
+    if (isNotValidToFillRect(rect, src_c))
         return;
 
     unsigned rowbytes = bitmap.fRowBytes/sizeof(GPixel);
@@ -87,14 +87,66 @@ void GContext3::fillIRect(const GIRect& rect, const GColor& src_c) {
     }
 }
 
+void GContext3::drawBitmap(const GBitmap& sBM, int x, int y, float alpha) {
+    /*
+    GBitmap& dBM = this->bitmap;
+    if (x > dBM.width() || y > dBM.height() || alpha <= 0 || dBM.width() + x < 0 || dBM.height() + y < 0)
+        return;
+
+    unsigned dRowBytes = dBM.fRowBytes/sizeof(GPixel);
+    unsigned sRowBytes = sBM.fRowBytes/sizeof(GPixel);
+
+    int bmLeft = x;
+    int draw_width = sBM.width();
+    int bmTop = y;
+    int draw_height = sBM.height(); 
+
+    if (x < 0) {
+        bmLeft = 0;
+        draw_width = sBM.width() + x;
+    }
+    if (bmLeft + draw_width > dBM.width()) {
+        draw_width = sBM.width() - bmLeft;
+    }
+    if (y < 0) {
+        bmTop = 0;
+        draw_height = sBM.height() + y;
+    }
+    if (bmTop + draw_height > dBM.height()) {
+        draw_height = dBM.height() - bmTop;
+    }
+    */
+
+    //Note to self: Src and Dest bitmaps have different rowbytes
+
+    unsigned dest_start = bmLeft + bmTop*dRowBytes;
+    unsigned dest_pix;
+
+    //What do you do if you start outside the range?
+    /*
+    for (int src_y = 0; src_y < draw_height; ++src_y) {
+        for (int src_x = 0; src_x < draw_width; ++src_x) {
+            dest_pix = dest_start + src_y*dRowBytes + src_x;
+            dBM[dest_pix] = blend_pixels(sBM[src_x + src_y*sRowBytes], dBM[dest_pix]);
+        }
+    }
+    */
+    //I might need to branch in the outside of the dest bitmap case
+    //Continue working on this when you get back
+}
+
+
 GPixel GContext3::blend_pixels(GPixel src, GPixel dest) {
-    unsigned out_a = (unsigned) (GPixel_GetA(src) + GPixel_GetA(dest)*((255 - GPixel_GetA(src))/255.0f) + 0.5f);
-    unsigned out_r = (unsigned) ((GPixel_GetR(src) + GPixel_GetR(dest)*((255 - GPixel_GetA(src))/255.0f)) + 0.5f);
-    unsigned out_g = (unsigned) ((GPixel_GetG(src) + GPixel_GetG(dest)*((255 - GPixel_GetA(src))/255.0f)) + 0.5f);
-    unsigned out_b = (unsigned) ((GPixel_GetB(src) + GPixel_GetB(dest)*((255 - GPixel_GetA(src))/255.0f)) + 0.5f);
+    unsigned out_a = (unsigned) (GPixel_GetA(src) + GPixel_GetA(dest)*div255(255 - GPixel_GetA(src)) + 0.5f);
+    unsigned out_r = (unsigned) ((GPixel_GetR(src) + GPixel_GetR(dest)*div255(255 - GPixel_GetA(src))) + 0.5f);
+    unsigned out_g = (unsigned) ((GPixel_GetG(src) + GPixel_GetG(dest)*div255(255 - GPixel_GetA(src))) + 0.5f);
+    unsigned out_b = (unsigned) ((GPixel_GetB(src) + GPixel_GetB(dest)*div255(255 - GPixel_GetA(src))) + 0.5f);
     return GPixel_PackARGB(out_a, out_r, out_g, out_b);
 }
 
+inline int GContext3::div255(int value) {
+    return (((value<<8) + value) + (257 << 7)) >> 16;
+}
 
 float GContext3::pin_float(float x) {
     x = (x < 0) ? 0 : x;
@@ -116,6 +168,6 @@ GPixel GContext3::color2pix(const GColor& color) {
     return GPixel_PackARGB(a, r, g, b);
 }
 
-bool GContext3::isValidToFillRect(GIRect const &rect, GColor const &src_c) {
+bool GContext3::isNotValidToFillRect(GIRect const &rect, GColor const &src_c) {
     return rect.fTop > bitmap.height() || rect.fLeft > bitmap.width() || rect.width() == 0 || rect.height() == 0  || rect.width() < 0 ||  rect.height() < 0 || src_c.fA <= 0.0;
 }
