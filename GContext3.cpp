@@ -88,7 +88,6 @@ void GContext3::fillIRect(const GIRect& rect, const GColor& src_c) {
 }
 
 void GContext3::drawBitmap(const GBitmap& sBM, int x, int y, float alpha) {
-    /*
     GBitmap& dBM = this->bitmap;
     if (x > dBM.width() || y > dBM.height() || alpha <= 0 || dBM.width() + x < 0 || dBM.height() + y < 0)
         return;
@@ -96,6 +95,27 @@ void GContext3::drawBitmap(const GBitmap& sBM, int x, int y, float alpha) {
     unsigned dRowBytes = dBM.fRowBytes/sizeof(GPixel);
     unsigned sRowBytes = sBM.fRowBytes/sizeof(GPixel);
 
+    int x_bound = (x + sBM.width() > dBM.width()) ? dBM.width() : sBM.width();
+    int y_bound = (y + sBM.height() > dBM.height()) ? dBM.height() : sBM.height();
+
+    int dX;
+    int sX;
+
+    if (x > 0 && y > 0) {
+        for (int i = 0; i < y_bound; ++i) {
+            for (int j = 0; j < x_bound; ++j) {
+                dBM[(x+j)+(y+i)*dRowBytes] = blend_pixels(sBM[j + i*sRowBytes], dBM[(x+j)+(y+i)*dRowBytes]);
+            }
+        }
+    }
+    if (x < 0 && y < 0) {
+        for (int i = 0; i < y_bound; ++i) {
+            for (int j = 0; j < x_bound; ++j) {
+                dBM[j + i*dRowBytes] = blend_pixels(sBM[(j-x) + (i-y)*sRowBytes], dBM[j + i*dRowBytes]);
+            }
+        }
+    }
+    /*
     int bmLeft = x;
     int draw_width = sBM.width();
     int bmTop = y;
@@ -115,13 +135,13 @@ void GContext3::drawBitmap(const GBitmap& sBM, int x, int y, float alpha) {
     if (bmTop + draw_height > dBM.height()) {
         draw_height = dBM.height() - bmTop;
     }
-    */
 
     //Note to self: Src and Dest bitmaps have different rowbytes
 
     unsigned dest_start = bmLeft + bmTop*dRowBytes;
     unsigned dest_pix;
 
+    */
     //What do you do if you start outside the range?
     /*
     for (int src_y = 0; src_y < draw_height; ++src_y) {
@@ -131,8 +151,6 @@ void GContext3::drawBitmap(const GBitmap& sBM, int x, int y, float alpha) {
         }
     }
     */
-    //I might need to branch in the outside of the dest bitmap case
-    //Continue working on this when you get back
 }
 
 
