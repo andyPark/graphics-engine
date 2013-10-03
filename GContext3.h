@@ -29,9 +29,10 @@ private:
     friend class GContext;
     GPixel color2pix(const GColor &c);
     GPixel blend_pixels(GPixel src, GPixel dest);
+    GPixel blend_alpha(GPixel src, float alpha);
     float pin_float(float x);
     bool isNotValidToFillRect(GIRect const &rect, GColor const &src_c);
-    static inline int div255(int value);
+    static inline float div255(int value);
 public:
     GContext3(const GBitmap&);
     virtual ~GContext3(); 
